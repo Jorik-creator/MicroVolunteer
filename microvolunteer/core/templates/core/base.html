@@ -1,0 +1,122 @@
+<!-- core/templates/core/base.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мікро-Волонтерство{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">
+                    <i class="fas fa-hands-helping"></i> Мікро-Волонтерство
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Головна</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'tasks' in request.path %}active{% endif %}" href="{% url 'task_list' %}">Завдання</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'about' in request.path %}active{% endif %}" href="{% url 'about' %}">Про нас</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'contact' in request.path %}active{% endif %}" href="{% url 'contact' %}">Контакти</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user"></i> {{ user.username }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'dashboard' %}">Особистий кабінет</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'profile' %}">Профіль</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'logout' %}">Вийти</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if 'login' in request.path %}active{% endif %}" href="{% url 'login' %}">Увійти</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if 'register' in request.path %}active{% endif %}" href="{% url 'register' %}">Зареєструватися</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-4 mb-5">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer py-4 bg-light mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Мікро-Волонтерство</h5>
+                    <p>Платформа для об'єднання волонтерів та людей, які потребують допомоги.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Навігація</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}">Головна</a></li>
+                        <li><a href="{% url 'task_list' %}">Завдання</a></li>
+                        <li><a href="{% url 'about' %}">Про нас</a></li>
+                        <li><a href="{% url 'contact' %}">Контакти</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Контакти</h5>
+                    <address>
+                        <i class="fas fa-map-marker-alt"></i> Україна, м. Київ<br>
+                        <i class="fas fa-phone"></i> +380 (99) 123-45-67<br>
+                        <i class="fas fa-envelope"></i> info@micro-volunteer.org
+                    </address>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; {% now "Y" %} Мікро-Волонтерство. Всі права захищені.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!-- core/templates/core/home.html -->
+{% extends 'core/base.html' %}
+
+{% block title %}Головна - Мікро-Волонтерство{% endblock %}
+
+{% block content %}
+<section class="hero py-5 bg-light rounded">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold">Допомагайте людям простими діями</h1>
+                <p class="lead">Приєднуйтесь до спільноти волонтерів та зробіть світ кращим через маленькі добрі справи.</p>
+                <div class="mt-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'task_list' %}" class="btn btn-primary btn-lg me-2">Знайти завдання</a>
+                        {% if user.user_type == 'vulnerable' %}
+                            <a href="{% url 'task_create' %}" class="btn btn-outline-secondary btn-lg">Створити завдання</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">Приєднатися</a>
+                        <a href="{% url 'about' %}" class="btn btn-outline-secondary btn-lg">Дізнатися більше</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img src="/static/images/hero-image.jpg" alt="Волонтерство" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="stats py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Наша спільнота у цифрах</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-3 col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                        <h3 class="counter">{{ volunteer_count }}</h3>
+                        <p class="card-text">Волонтерів</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-hands-helping fa-3x text-primary mb-3"></i>
+                        <h3 class="counter">{{ vulnerable_count }}</h3>
+                        <p class="card-text">Людей, яким допомогли</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
+                        <h3 class="counter">{{ tasks_count }}</h3>
+                        <p class="card-text">Створених завдань</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-3x text-primary mb-3"></i>
+                        <h3 class="counter">{{ completed_tasks }}</h3>
+                        <p class="card-text">Виконаних завдань</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Як це працює</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-user-plus fa-3x text-primary"></i>
+                        </div>
+                        <h3>Крок 1</h3>
+                        <h4>Зареєструйтеся</h4>
+                        <p>Створіть обліковий запис як волонтер або як людина, яка потребує допомоги.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-search fa-3x text-primary"></i>
+                        </div>
+                        <h3>Крок 2</h3>
+                        <h4>Знайдіть або створіть завдання</h4>
+                        <p>Волонтери можуть знайти завдання, а вразливі люди - створити запит на допомогу.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-handshake fa-3x text-primary"></i>
+                        </div>
+                        <h3>Крок 3</h3>
+                        <h4>Допоможіть або отримайте допомогу</h4>
+                        <p>Волонтери виконують завдання, а вразливі люди отримують необхідну підтримку.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="active-tasks py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Актуальні завдання</h2>
+            <a href="{% url 'task_list' %}" class="btn btn-outline-primary">Всі завдання</a>
+        </div>
+        <div class="row g-4">
+            {% if active_tasks %}
+                {% for task in active_tasks %}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            {% if task.images.first %}
+                                <img src="{{ task.images.first.image.url }}" class="card-img-top" alt="{{ task.title }}">
+                            {% else %}
+                                <div class="card-img-top bg-light text-center py-5">
+                                    <i class="fas fa-tasks fa-3x text-secondary"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ task.title }}</h5>
+                                <p class="card-text">{{ task.description|truncatechars:100 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt"></i> {{ task.location }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt"></i> {{ task.start_date|date:"d.m.Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-primary">Детальніше</a>
+                                <small class="text-muted float-end">
+                                    Вільних місць: {{ task.available_spots }}/{{ task.max_participants }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        На даний момент немає активних завдань.
+                        {% if user.is_authenticated and user.user_type == 'vulnerable' %}
+                            <a href="{% url 'task_create' %}">Створіть нове завдання</a>.
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="testimonials py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Що говорять наші користувачі</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <img src="/static/images/testimonial-1.jpg" alt="Олена" class="rounded-circle" width="60">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-0">Олена Петренко</h5>
+                                <p class="text-muted">Волонтер</p>
+                            </div>
+                        </div>
+                        <p class="card-text">"Мікро-волонтерство дозволяє мені допомагати іншим навіть з моїм напруженим графіком. Кожного разу, коли я виконую завдання, я відчуваю, що роблю світ трохи кращим."</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <img src="/static/images/testimonial-2.jpg" alt="Іван" class="rounded-circle" width="60">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-0">Іван Ковальчук</h5>
+                                <p class="text-muted">Отримав допомогу</p>
+                            </div>
+                        </div>
+                        <p class="card-text">"У мене проблеми з мобільністю, і мені важко виходити з дому. Завдяки цій платформі, я знайшов людей, які допомагають мені з покупками та іншими справами."</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <img src="/static/images/testimonial-3.jpg" alt="Марія" class="rounded-circle" width="60">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-0">Марія Сидоренко</h5>
+                                <p class="text-muted">Волонтер</p>
+                            </div>
+                        </div>
+                        <p class="card-text">"Я зустріла стільки цікавих людей завдяки волонтерству. Це не лише допомога іншим, але й можливість знайти нових друзів та розширити свій кругозір."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="call-to-action py-5">
+    <div class="container">
+        <div class="p-5 text-center bg-primary text-white rounded">
+            <h2 class="mb-3">Готові допомогти?</h2>
+            <p class="lead">Приєднуйтесь до нашої спільноти сьогодні та почніть робити добрі справи!</p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg mt-3">Зареєструватися</a>
+            {% else %}
+                <a href="{% url 'task_list' %}" class="btn btn-light btn-lg mt-3">Знайти завдання</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Simple counter animation for statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.counter').forEach(counter => {
+            const target = parseInt(counter.innerHTML);
+            let count = 0;
+            const duration = 1500; // milliseconds
+            const step = target / (duration / 25);
+
+            const timer = setInterval(function() {
+                count += step;
+                counter.innerHTML = Math.floor(count);
+                if (count >= target) {
+                    counter.innerHTML = target;
+                    clearInterval(timer);
+                }
+            }, 25);
+        });
+    });
+</script>
+{% endblock %}

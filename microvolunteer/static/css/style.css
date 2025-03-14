@@ -1,0 +1,302 @@
+* Загальні стилі */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+}
+
+main {
+    flex: 1;
+}
+
+/* Навігація */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand i {
+    margin-right: 10px;
+    color: #0d6efd;
+}
+
+/* Заголовки */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+}
+
+/* Героїчний блок (Hero) */
+.hero {
+    padding: 4rem 0;
+    background-color: #f8f9fa;
+}
+
+/* Картки */
+.card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Статистика */
+.stats .counter {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+/* Як це працює */
+.how-it-works .icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* Відгуки */
+.testimonials {
+    background-color: #f8f9fa;
+}
+
+/* Заклик до дії */
+.call-to-action .bg-primary {
+    border-radius: 1rem;
+}
+
+/* Футер */
+.footer {
+    background-color: #f8f9fa;
+    margin-top: auto;
+}
+
+.footer a {
+    color: #333;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+/* Сторінка завдань */
+.task-filter .card {
+    position: sticky;
+    top: 20px;
+}
+
+/* Деталі завдання */
+.carousel-inner img {
+    height: 400px;
+    object-fit: cover;
+}
+
+/* Особистий кабінет */
+.dashboard-stats .card {
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+.dashboard-stats .card:hover {
+    background-color: #f8f9fa;
+}
+
+/* Сторінка профілю */
+.profile-image {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: cover;
+}
+
+/* Кнопки */
+.btn {
+    border-radius: 5px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+
+/* Форми */
+.form-control {
+    border-radius: 5px;
+    padding: 0.75rem;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Жетони (badges) */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+}
+
+/* Картки завдань */
+.task-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-card .card-body {
+    flex: 1;
+}
+
+/* Сторінка команди */
+.team-member img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Повідомлення */
+.alert {
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+}
+
+/* Адаптивність */
+@media (max-width: 767.98px) {
+    .hero {
+        padding: 2rem 0;
+    }
+
+    .carousel-inner img {
+        height: 250px;
+    }
+
+    .stats .counter {
+        font-size: 2rem;
+    }
+}
+
+/* Анімація завантаження для кнопок */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1em;
+    height: 1em;
+    margin-top: -0.5em;
+    margin-left: -0.5em;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: btn-loading-spinner 0.75s linear infinite;
+}
+
+@keyframes btn-loading-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Кастомізація заголовків сторінок */
+.page-header {
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+}
+
+/* Стилі для інтерактивних елементів */
+a {
+    transition: color 0.3s;
+}
+
+/* Стилі для Поширених питань (FAQ) */
+.faq-section .card-header {
+    cursor: pointer;
+}
+
+.faq-section .card-header h5 {
+    margin-bottom: 0;
+}
+
+/* Стилі для галереї зображень на сторінці завдання */
+.task-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.task-gallery img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.task-gallery img:hover {
+    transform: scale(1.05);
+}
+
+/* Стилі для попереднього перегляду зображень */
+.image-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.image-preview-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.image-preview-item .remove-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
