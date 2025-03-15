@@ -1,10 +1,7 @@
 // Ініціалізація при завантаженні DOM
 document.addEventListener('DOMContentLoaded', function() {
     // Ініціалізація Tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    initTooltips();
 
     // Анімація для лічильників на головній сторінці
     initCounterAnimation();
@@ -21,6 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Валідація форм
     initFormValidation();
 });
+
+// Ініціалізація Tooltips
+function initTooltips() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
 
 // Функція для анімації лічильників
 function initCounterAnimation() {
@@ -166,13 +171,6 @@ function previewImage(input, preview) {
     }
 }
 
-// Функція для відкриття модального вікна з повноекранним переглядом зображення
-function openImageModal(src) {
-    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-    document.getElementById('modalImage').src = src;
-    modal.show();
-}
-
 // Функція для фільтрації завдань на сторінці списку завдань
 function filterTasks() {
     const searchForm = document.getElementById('task-search-form');
@@ -191,33 +189,6 @@ function clearFilters() {
         });
         form.submit();
     }
-}
-
-// Функція для зміни статусу завдання (AJAX)
-function updateTaskStatus(taskId, status) {
-    // Реалізація AJAX запиту для оновлення статусу завдання
-    // Це псевдокод, який потрібно замінити реальною реалізацією
-    fetch(`/tasks/${taskId}/status/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ status: status })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Оновлення UI після успішного оновлення статусу
-            window.location.reload();
-        } else {
-            alert('Помилка при оновленні статусу завдання.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Виникла помилка при оновленні статусу завдання.');
-    });
 }
 
 // Допоміжна функція для отримання CSRF-токена з cookies

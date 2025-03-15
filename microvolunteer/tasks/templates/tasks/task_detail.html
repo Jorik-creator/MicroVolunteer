@@ -105,28 +105,16 @@
                         {% endwith %}
                     {% endwith %}
                 </div>
+
                 <small class="text-muted d-block mb-3">
                     {{ task.available_spots }} вільних місць з {{ task.max_participants }}
                 </small>
 
                 {% if user.is_authenticated %}
-                    {% if is_participant %}
-                        <form action="{% url 'task_leave' task.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger d-block w-100 mb-2" {% if task.is_past_due %}disabled{% endif %}>
-                                <i class="fas fa-sign-out-alt"></i> Відмовитися від участі
-                            </button>
-                        </form>
-                    {% elif can_join %}
-                        <form action="{% url 'task_join' task.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success d-block w-100 mb-2">
-                                <i class="fas fa-hands-helping"></i> Прийняти участь
-                            </button>
-                        </form>
-                    {% endif %}
-
                     {% if request.user == task.creator %}
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i> Ви є автором цього завдання
+                        </div>
                         <div class="d-grid gap-2">
                             <a href="{% url 'task_update' task.id %}" class="btn btn-outline-primary">
                                 <i class="fas fa-edit"></i> Редагувати
@@ -153,6 +141,20 @@
                                 </form>
                             {% endif %}
                         </div>
+                    {% elif is_participant %}
+                        <form action="{% url 'task_leave' task.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger d-block w-100 mb-2" {% if task.is_past_due %}disabled{% endif %}>
+                                <i class="fas fa-sign-out-alt"></i> Відмовитися від участі
+                            </button>
+                        </form>
+                    {% elif can_join %}
+                        <form action="{% url 'task_join' task.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success d-block w-100 mb-2">
+                                <i class="fas fa-hands-helping"></i> Прийняти участь
+                            </button>
+                        </form>
                     {% endif %}
                 {% else %}
                     <a href="{% url 'login' %}" class="btn btn-primary d-block w-100">
@@ -189,7 +191,6 @@
     </div>
 </div>
 
-<!-- Delete Task Modal -->
 {% if request.user == task.creator %}
     <div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-labelledby="deleteTaskModalLabel" aria-hidden="true">
         <div class="modal-dialog">

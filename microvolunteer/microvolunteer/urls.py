@@ -20,11 +20,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Адмін-панель
     path('admin/', admin.site.urls),
+
+    # Основні сторінки
     path('', include('core.urls')),
+
+    # URL для управління користувачами
     path('users/', include('users.urls')),
+
+    # URL для управління завданнями
     path('tasks/', include('tasks.urls')),
 ]
 
+# URL для медіа-файлів у режимі розробки(доробити)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
