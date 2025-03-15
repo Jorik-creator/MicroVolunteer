@@ -1,4 +1,4 @@
-* Загальні стилі */
+/* Загальні стилі */
 body {
     min-height: 100vh;
     display: flex;
@@ -26,7 +26,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
 }
 
-/* Героїчний блок (Hero) */
+/* Рукз блок */
 .hero {
     padding: 4rem 0;
     background-color: #f8f9fa;
@@ -70,11 +70,6 @@ h1, h2, h3, h4, h5, h6 {
 /* Відгуки */
 .testimonials {
     background-color: #f8f9fa;
-}
-
-/* Заклик до дії */
-.call-to-action .bg-primary {
-    border-radius: 1rem;
 }
 
 /* Футер */
@@ -129,16 +124,6 @@ h1, h2, h3, h4, h5, h6 {
     transition: all 0.3s;
 }
 
-.btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.btn-primary:hover {
-    background-color: #0b5ed7;
-    border-color: #0b5ed7;
-}
-
 /* Форми */
 .form-control {
     border-radius: 5px;
@@ -150,34 +135,42 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-/* Жетони (badges) */
-.badge {
-    padding: 0.5em 0.8em;
-    font-weight: 500;
+/* Загальний стиль для полів форм */
+.form-input {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* Картки завдань */
-.task-card {
+/* Стилі для textarea */
+.form-textarea {
+    min-height: 150px;
+}
+
+/* Стилі для попереднього перегляду зображень */
+.image-preview-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.image-preview-item img {
+    width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.task-card .card-body {
-    flex: 1;
-}
-
-/* Сторінка команди */
-.team-member img {
-    width: 150px;
-    height: 150px;
     object-fit: cover;
-}
-
-/* Повідомлення */
-.alert {
-    border-radius: 5px;
-    margin-bottom: 1.5rem;
 }
 
 /* Адаптивність */
@@ -195,7 +188,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-/* Анімація завантаження для кнопок */
+/* Анімація для кнопок завантажеггя */
 .btn-loading {
     position: relative;
     pointer-events: none;
@@ -220,83 +213,4 @@ h1, h2, h3, h4, h5, h6 {
     to {
         transform: rotate(360deg);
     }
-}
-
-/* Кастомізація заголовків сторінок */
-.page-header {
-    padding: 2rem 0;
-    margin-bottom: 2rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-}
-
-/* Стилі для інтерактивних елементів */
-a {
-    transition: color 0.3s;
-}
-
-/* Стилі для Поширених питань (FAQ) */
-.faq-section .card-header {
-    cursor: pointer;
-}
-
-.faq-section .card-header h5 {
-    margin-bottom: 0;
-}
-
-/* Стилі для галереї зображень на сторінці завдання */
-.task-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
-}
-
-.task-gallery img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.3s;
-}
-
-.task-gallery img:hover {
-    transform: scale(1.05);
-}
-
-/* Стилі для попереднього перегляду зображень */
-.image-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.image-preview-item {
-    position: relative;
-    width: 100px;
-    height: 100px;
-}
-
-.image-preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 5px;
-}
-
-.image-preview-item .remove-btn {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
 }

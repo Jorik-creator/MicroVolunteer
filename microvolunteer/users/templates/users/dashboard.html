@@ -1,265 +1,606 @@
-<!-- core/templates/core/home.html -->
 {% extends 'core/base.html' %}
 {% load task_filters %}
-{% block title %}Головна - Мікро-Волонтерство{% endblock %}
+
+{% block title %}Особистий кабінет - Мікро-Волонтерство{% endblock %}
+
+{% block extra_head %}
+<!-- Використав Chart.js для графіків -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
-<section class="hero py-5 bg-light rounded">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="display-4 fw-bold">Допомагайте людям простими діями</h1>
-                <p class="lead">Приєднуйтесь до спільноти волонтерів та зробіть світ кращим через маленькі добрі справи.</p>
-                <div class="mt-4">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'task_list' %}" class="btn btn-primary btn-lg me-2">Знайти завдання</a>
-                        {% if user.user_type == 'vulnerable' %}
-                            <a href="{% url 'task_create' %}" class="btn btn-outline-secondary btn-lg">Створити завдання</a>
-                        {% endif %}
+<div class="container py-4">
+    <!-- Заголовок та основна інформація -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Особистий кабінет</h1>
+            <p class="lead">Вітаємо, {{ user.username }}!</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'profile' %}" class="btn btn-primary">
+                <i class="fas fa-user-edit"></i> Редагувати профіль
+            </a>
+        </div>
+    </div>
+
+    <!-- Загальна статистика користувача -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Загальна інформація</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="{{ user.username }}" class="rounded-circle img-fluid mb-3" style="max-width: 120px; max-height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary text-white mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-4x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+                                    <p><strong>Роль:</strong> {{ user.get_user_type_display }}</p>
+                                    <p><strong>Email:</strong> {{ user.email }}</p>
+                                    {% if user.phone %}
+                                        <p><strong>Телефон:</strong> {{ user.phone }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Дата реєстрації:</strong> {{ user_joined_date }}</p>
+                                    <p><strong>На платформі:</strong> {{ days_as_member }} днів</p>
+                                    {% if user.user_type == 'volunteer' %}
+                                        <p><strong>Прийнято завдань:</strong> {{ total_participations }}</p>
+                                        <p><strong>Завершено:</strong> {{ completed_count }}</p>
+                                    {% else %}
+                                        <p><strong>Створено завдань:</strong> {{ total_created_tasks }}</p>
+                                        <p><strong>Завершено:</strong> {{ completed_tasks_count }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вміст для волонтера -->
+    {% if user.user_type == 'volunteer' %}
+    <div class="row mb-4">
+        <!-- Статистичні карти для волонтера -->
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
+                    <h3 class="counter">{{ total_participations }}</h3>
+                    <p class="card-text">Завдань взято</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h3 class="counter">{{ completed_count }}</h3>
+                    <p class="card-text">Завершено</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-3x text-info mb-3"></i>
+                    <h3 class="counter">{{ total_hours_helped }}</h3>
+                    <p class="card-text">Годин допомоги</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-tag fa-3x text-warning mb-3"></i>
+                    <h3 class="counter">{{ categories_helped }}</h3>
+                    <p class="card-text">Категорій завдань</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Графік активності волонтера -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Ваша активність</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="activityChart" width="400" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список категорій завдань волонтера -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Допомога за категоріями</h5>
+                </div>
+                <div class="card-body">
+                    {% if categories_list %}
+                        <ul class="list-group">
+                            {% for category in categories_list %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ category }}
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     {% else %}
-                        <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">Приєднатися</a>
-                        <a href="{% url 'about' %}" class="btn btn-outline-secondary btn-lg">Дізнатися більше</a>
+                        <p class="text-center text-muted">Поки що немає даних про категорії</p>
                     {% endif %}
                 </div>
             </div>
-            <div class="col-md-6">
-                <img src="/static/images/hero-image.jpg" alt="Волонтерство" class="img-fluid rounded">
-            </div>
         </div>
     </div>
-</section>
 
-<section class="stats py-5">
-    <div class="container">
-        <h2 class="text-center mb-4">Наша спільнота у цифрах</h2>
-        <div class="row g-4 text-center">
-            <div class="col-md-3 col-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h3 class="counter">{{ volunteer_count }}</h3>
-                        <p class="card-text">Волонтерів</p>
-                    </div>
+    <!-- Активні завдання волонтера -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Мої активні завдання</h5>
                 </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <i class="fas fa-hands-helping fa-3x text-primary mb-3"></i>
-                        <h3 class="counter">{{ vulnerable_count }}</h3>
-                        <p class="card-text">Людей, яким допомогли</p>
+                <div class="card-body">
+                    {% if active_participations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Назва завдання</th>
+                                    <th>Категорія</th>
+                                    <th>Дата початку</th>
+                                    <th>Місце</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participation in active_participations %}
+                                <tr>
+                                    <td>{{ participation.task.title }}</td>
+                                    <td>
+                                        {% if participation.task.category %}
+                                            <span class="badge bg-primary">{{ participation.task.category.name }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Без категорії</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ participation.task.start_date|date:"d.m.Y H:i" }}</td>
+                                    <td>{{ participation.task.location }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if participation.task.status == 'open' %}success{% else %}warning{% endif %}">
+                                            {{ participation.task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'task_detail' participation.task.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if not participation.task.is_past_due %}
+                                        <a href="{% url 'task_leave' participation.task.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
-                        <h3 class="counter">{{ tasks_count }}</h3>
-                        <p class="card-text">Створених завдань</p>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="mb-3 text-muted">У вас немає активних завдань</p>
+                        <a href="{% url 'task_list' %}" class="btn btn-primary">Знайти завдання</a>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <i class="fas fa-check-circle fa-3x text-primary mb-3"></i>
-                        <h3 class="counter">{{ completed_tasks }}</h3>
-                        <p class="card-text">Виконаних завдань</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="how-it-works py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">Як це працює</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper mb-3">
-                            <i class="fas fa-user-plus fa-3x text-primary"></i>
-                        </div>
-                        <h3>Крок 1</h3>
-                        <h4>Зареєструйтеся</h4>
-                        <p>Створіть обліковий запис як волонтер або як людина, яка потребує допомоги.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper mb-3">
-                            <i class="fas fa-search fa-3x text-primary"></i>
-                        </div>
-                        <h3>Крок 2</h3>
-                        <h4>Знайдіть або створіть завдання</h4>
-                        <p>Волонтери можуть знайти завдання, а вразливі люди - створити запит на допомогу.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper mb-3">
-                            <i class="fas fa-handshake fa-3x text-primary"></i>
-                        </div>
-                        <h3>Крок 3</h3>
-                        <h4>Допоможіть або отримайте допомогу</h4>
-                        <p>Волонтери виконують завдання, а вразливі люди отримують необхідну підтримку.</p>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</section>
 
-<section class="active-tasks py-5">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Актуальні завдання</h2>
-            <a href="{% url 'task_list' %}" class="btn btn-outline-primary">Всі завдання</a>
+    <!-- Завершені завдання волонтера -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Історія виконаних завдань</h5>
+                </div>
+                <div class="card-body">
+                    {% if completed_participations %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Назва завдання</th>
+                                    <th>Категорія</th>
+                                    <th>Дата проведення</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for participation in completed_participations %}
+                                <tr>
+                                    <td>{{ participation.task.title }}</td>
+                                    <td>
+                                        {% if participation.task.category %}
+                                            <span class="badge bg-primary">{{ participation.task.category.name }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Без категорії</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ participation.task.start_date|date:"d.m.Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ participation.task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'task_detail' participation.task.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted py-4">У вас ще немає виконаних завдань</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="row g-4">
-            {% if active_tasks %}
-                {% for task in active_tasks %}
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            {% if task.images.first %}
-                                <img src="{{ task.images.first.image.url }}" class="card-img-top" alt="{{ task.title }}">
-                            {% else %}
-                                <div class="card-img-top bg-light text-center py-5">
-                                    <i class="fas fa-tasks fa-3x text-secondary"></i>
+    </div>
+
+    <!-- Вміст для вразливих людей -->
+    {% else %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list fa-3x text-primary mb-3"></i>
+                    <h3 class="counter">{{ total_created_tasks }}</h3>
+                    <p class="card-text">Створених завдань</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h3 class="counter">{{ completed_tasks_count }}</h3>
+                    <p class="card-text">Виконаних завдань</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-ban fa-3x text-danger mb-3"></i>
+                    <h3 class="counter">{{ cancelled_tasks_count }}</h3>
+                    <p class="card-text">Скасованих завдань</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-info mb-3"></i>
+                    <h3 class="counter">{{ total_volunteers_helped }}</h3>
+                    <p class="card-text">Волонтерів допомогло</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Завдання за категоріями</h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 250px;">
+                    <canvas id="categoriesChart"></canvas>
+                </div>
+                {% if not chart_categories %}
+                <p class="text-center text-muted mt-3">Немає даних для відображення</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+        <!-- Статистика заповненості завдань -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Заповненість завдань</h5>
+                </div>
+                <div class="card-body">
+                    {% if task_participation_stats %}
+                        <div class="list-group">
+                            {% for stat in task_participation_stats|slice:":5" %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ stat.task.title }}</h6>
+                                        <small>{{ stat.participants_count }}/{{ stat.task.max_participants }}</small>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 5px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             style="width: {{ stat.participation_rate }}%"
+                                             aria-valuenow="{{ stat.participation_rate }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
                                 </div>
-                            {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ task.title }}</h5>
-                                <p class="card-text">{{ task.description|truncatechars:100 }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
-                                        <i class="fas fa-map-marker-alt"></i> {{ task.location }}
-                                    </small>
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar-alt"></i> {{ task.start_date|date:"d.m.Y" }}
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-primary">Детальніше</a>
-                                <small class="text-muted float-end">
-                                    Вільних місць: {{ task.available_spots }}/{{ task.max_participants }}
-                                </small>
-                            </div>
+                            {% endfor %}
                         </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        На даний момент немає активних завдань.
-                        {% if user.is_authenticated and user.user_type == 'vulnerable' %}
-                            <a href="{% url 'task_create' %}">Створіть нове завдання</a>.
+                        {% if task_participation_stats|length > 5 %}
+                            <div class="text-center mt-3">
+                                <small class="text-muted">Показано 5 з {{ task_participation_stats|length }} завдань</small>
+                            </div>
                         {% endif %}
-                    </div>
+                    {% else %}
+                        <p class="text-center text-muted">Немає даних про заповненість завдань</p>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
-</section>
 
-<section class="testimonials py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">Що говорять наші користувачі</h2>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex mb-3">
-                            <div class="flex-shrink-0">
-                                <img src="/static/images/testimonial-1.jpg" alt="Олена" class="rounded-circle" width="60">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h5 class="mb-0">Олена Петренко</h5>
-                                <p class="text-muted">Волонтер</p>
-                            </div>
-                        </div>
-                        <p class="card-text">"Мікро-волонтерство дозволяє мені допомагати іншим навіть з моїм напруженим графіком. Кожного разу, коли я виконую завдання, я відчуваю, що роблю світ трохи кращим."</p>
-                    </div>
+    <!-- Активні завдання вразливої людини -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Мої активні завдання</h5>
+                    <a href="{% url 'task_create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Створити завдання
+                    </a>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex mb-3">
-                            <div class="flex-shrink-0">
-                                <img src="/static/images/testimonial-2.jpg" alt="Іван" class="rounded-circle" width="60">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h5 class="mb-0">Іван Ковальчук</h5>
-                                <p class="text-muted">Отримав допомогу</p>
-                            </div>
-                        </div>
-                        <p class="card-text">"У мене проблеми з мобільністю, і мені важко виходити з дому. Завдяки цій платформі, я знайшов людей, які допомагають мені з покупками та іншими справами."</p>
+                <div class="card-body">
+                    {% if active_tasks %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Назва завдання</th>
+                                    <th>Категорія</th>
+                                    <th>Дата початку</th>
+                                    <th>Учасники</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in active_tasks %}
+                                <tr>
+                                    <td>{{ task.title }}</td>
+                                    <td>
+                                        {% if task.category %}
+                                            <span class="badge bg-primary">{{ task.category.name }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Без категорії</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ task.start_date|date:"d.m.Y H:i" }}</td>
+                                    <td>{{ task.participants.count }}/{{ task.max_participants }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if task.status == 'open' %}success{% else %}warning{% endif %}">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'task_update' task.id %}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'task_complete' task.id %}" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="{% url 'task_cancel' task.id %}" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex mb-3">
-                            <div class="flex-shrink-0">
-                                <img src="/static/images/testimonial-3.jpg" alt="Марія" class="rounded-circle" width="60">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h5 class="mb-0">Марія Сидоренко</h5>
-                                <p class="text-muted">Волонтер</p>
-                            </div>
-                        </div>
-                        <p class="card-text">"Я зустріла стільки цікавих людей завдяки волонтерству. Це не лише допомога іншим, але й можливість знайти нових друзів та розширити свій кругозір."</p>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="mb-3 text-muted">У вас немає активних завдань</p>
+                        <a href="{% url 'task_create' %}" class="btn btn-primary">Створити завдання</a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</section>
 
-<section class="call-to-action py-5">
-    <div class="container">
-        <div class="p-5 text-center bg-primary text-white rounded">
-            <h2 class="mb-3">Готові допомогти?</h2>
-            <p class="lead">Приєднуйтесь до нашої спільноти сьогодні та почніть робити добрі справи!</p>
-            {% if not user.is_authenticated %}
-                <a href="{% url 'register' %}" class="btn btn-light btn-lg mt-3">Зареєструватися</a>
-            {% else %}
-                <a href="{% url 'task_list' %}" class="btn btn-light btn-lg mt-3">Знайти завдання</a>
-            {% endif %}
+    <!-- Завершені завдання вразливої людини -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Історія завдань</h5>
+                </div>
+                <div class="card-body">
+                    {% if completed_tasks %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Назва завдання</th>
+                                    <th>Категорія</th>
+                                    <th>Дата проведення</th>
+                                    <th>Учасники</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in completed_tasks %}
+                                <tr>
+                                    <td>{{ task.title }}</td>
+                                    <td>
+                                        {% if task.category %}
+                                            <span class="badge bg-primary">{{ task.category.name }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Без категорії</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ task.start_date|date:"d.m.Y" }}</td>
+                                    <td>{{ task.participants.count }}/{{ task.max_participants }}</td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ task.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted py-4">У вас ще немає завершених завдань</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
-</section>
+    {% endif %}
+
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-    // Simple counter animation for statistics
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.counter').forEach(counter => {
-            const target = parseInt(counter.innerHTML);
-            let count = 0;
-            const duration = 1500; // milliseconds
-            const step = target / (duration / 25);
-
-            const timer = setInterval(function() {
-                count += step;
-                counter.innerHTML = Math.floor(count);
-                if (count >= target) {
-                    counter.innerHTML = target;
-                    clearInterval(timer);
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+// Ініціалізація графіків, якщо користувач - волонтер
+{% if user.user_type == 'volunteer' %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Графік активності волонтера
+    var ctxActivity = document.getElementById('activityChart').getContext('2d');
+    var activityChart = new Chart(ctxActivity, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_months|safe }},
+            datasets: [{
+                label: 'Кількість прийнятих завдань',
+                data: {{ chart_counts|safe }},
+                backgroundColor: 'rgba(13, 110, 253, 0.5)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
                 }
-            }, 25);
-        });
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Активність за останні 6 місяців'
+                }
+            }
+        }
     });
+});
+{% endif %}
+
+// Ініціалізація графіків, якщо користувач - вразлива людина
+{% if user.user_type == 'vulnerable' %}
+document.addEventListener('DOMContentLoaded', function() {
+    {% if chart_categories %}
+    // Графік розподілу завдань за категоріями
+    var ctxCategories = document.getElementById('categoriesChart').getContext('2d');
+    var categoriesChart = new Chart(ctxCategories, {
+        type: 'pie',
+        data: {
+            labels: {{ chart_categories|safe }},
+            datasets: [{
+                data: {{ chart_category_counts|safe }},
+                backgroundColor: [
+                    'rgba(13, 110, 253, 0.7)',
+                    'rgba(25, 135, 84, 0.7)',
+                    'rgba(253, 126, 20, 0.7)',
+                    'rgba(220, 53, 69, 0.7)',
+                    'rgba(13, 202, 240, 0.7)',
+                    'rgba(108, 117, 125, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+});
+{% endif %}
+
+// Анімація лічильників
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.counter').forEach(counter => {
+        const target = parseInt(counter.innerHTML);
+        let count = 0;
+        const duration = 1500;
+        const step = target / (duration / 25);
+
+        const timer = setInterval(function() {
+            count += step;
+            counter.innerHTML = Math.floor(count);
+            if (count >= target) {
+                counter.innerHTML = target;
+                clearInterval(timer);
+            }
+        }, 25);
+    });
+});
 </script>
 {% endblock %}

@@ -4,14 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.utils import timezone
 from .models import Task, Category, Participation, TaskImage
 from .forms import TaskForm, TaskImageForm, TaskSearchForm, ParticipationForm
 
 
 def task_list(request):
-    """
-    View for displaying the list of tasks with filtering options
-    """
+    # За замовчуванням показує відкриті завдання
     tasks = Task.objects.filter(status='open').order_by('-created_at')
     form = TaskSearchForm(request.GET)
 
@@ -22,6 +21,7 @@ def task_list(request):
         date_to = form.cleaned_data.get('date_to')
         status = form.cleaned_data.get('status')
 
+        # Пошук за ключовими словами
         if query:
             tasks = tasks.filter(
                 Q(title__icontains=query) |
@@ -29,19 +29,22 @@ def task_list(request):
                 Q(location__icontains=query)
             )
 
+        # Фільтрація за категорією
         if category:
             tasks = tasks.filter(category=category)
 
+        # Фільтрація за датою
         if date_from:
             tasks = tasks.filter(start_date__gte=date_from)
 
         if date_to:
             tasks = tasks.filter(start_date__lte=date_to)
 
+        # Фільтрація за статусом
         if status:
             tasks = tasks.filter(status=status)
 
-    paginator = Paginator(tasks, 12)  # Show 12 tasks per page
+    paginator = Paginator(tasks, 12)  # 12 завдань на сторінку
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -58,8 +61,12 @@ def task_detail(request, pk):
     is_participant = False
     can_join = False
 
+    # Перевіряє, чи користувач авторизований
     if request.user.is_authenticated:
+        # Перевіряє, чи користувач є учасником завдання
         is_participant = Participation.objects.filter(task=task, user=request.user).exists()
+
+        # Перевіряє, чи може користувач приєднатись до завдання
         can_join = (not is_participant and
                     task.status == 'open' and
                     task.available_spots > 0 and
@@ -79,6 +86,7 @@ def task_create(request):
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save(commit=False)
+            # Встановлює поточного користувача як створювача
             task.creator = request.user
             task.save()
 
@@ -102,7 +110,7 @@ def task_create(request):
 def task_update(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
-    # Ensure only the creator can update the task
+    # Перевіряє, чи поточний користувач є автором завдання
     if request.user != task.creator:
         messages.error(request, 'У вас немає дозволу на редагування цього завдання.')
         return redirect('task_detail', pk=task.pk)
@@ -112,6 +120,7 @@ def task_update(request, pk):
         if form.is_valid():
             form.save()
 
+            # Обробляє нові завантажені зображення
             images = request.FILES.getlist('images')
             for image in images:
                 TaskImage.objects.create(task=task, image=image)
@@ -133,7 +142,7 @@ def task_update(request, pk):
 def task_delete(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
-    # Ensure only the creator can delete the task
+    # Перевіряє, чи поточний користувач є автором завдання
     if request.user != task.creator:
         messages.error(request, 'У вас немає дозволу на видалення цього завдання.')
         return redirect('task_detail', pk=task.pk)
@@ -150,28 +159,35 @@ def task_delete(request, pk):
 def task_join(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
-    # Check if user can join
+    # Перевіряємо, чи користувач не є автором завдання
+    if request.user == task.creator:
+        messages.error(request, 'Ви не можете приєднатися до власного завдання.')
+        return redirect('task_detail', pk=task.pk)
+
+    # Перевіряє, чи завдання відкрите для участі
     if task.status != 'open':
         messages.error(request, 'Це завдання не є відкритим для участі.')
         return redirect('task_detail', pk=task.pk)
 
+    # Перевіряє наявність вільних місць
     if task.available_spots <= 0:
         messages.error(request, 'На жаль, усі місця для цього завдання вже зайняті.')
         return redirect('task_detail', pk=task.pk)
 
+    # Перевіряє, чи завдання вже минуло
     if task.is_past_due:
         messages.error(request, 'Це завдання вже минуло.')
         return redirect('task_detail', pk=task.pk)
 
-    # Check if already joined
+    # Перевіряє, чи користувач уже є учасником
     if Participation.objects.filter(task=task, user=request.user).exists():
         messages.info(request, 'Ви вже приєдналися до цього завдання.')
         return redirect('task_detail', pk=task.pk)
 
-    # Join the task
+    # Створює запис про участь
     Participation.objects.create(task=task, user=request.user)
 
-    # If all spots are filled, change status to in_progress
+    # Якщо всі місця заповнені, змінює статус на "в процесі"
     if task.available_spots == 0:
         task.status = 'in_progress'
         task.save()
@@ -185,14 +201,15 @@ def task_leave(request, pk):
     task = get_object_or_404(Task, pk=pk)
     participation = get_object_or_404(Participation, task=task, user=request.user)
 
-    # Check if the task has already started
+    # Перевіряє, чи завдання вже розпочалося
     if task.is_past_due:
         messages.error(request, 'Ви не можете покинути завдання, яке вже розпочалося.')
         return redirect('task_detail', pk=task.pk)
 
+    # Видаляє запис про участь
     participation.delete()
 
-    # If task was in_progress, change back to open
+    # Якщо завдання було в процесі, змінює статус на "відкрито"
     if task.status == 'in_progress':
         task.status = 'open'
         task.save()
@@ -205,7 +222,7 @@ def task_leave(request, pk):
 def task_complete(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
-    # Ensure only the creator can complete the task
+    # Перевіряє, чи поточний користувач є автором завдання
     if request.user != task.creator:
         messages.error(request, 'У вас немає дозволу на завершення цього завдання.')
         return redirect('task_detail', pk=task.pk)
@@ -221,7 +238,7 @@ def task_complete(request, pk):
 def task_cancel(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
-    # Ensure only the creator can cancel the task
+    # Перевіряє, чи поточний користувач є автором завдання
     if request.user != task.creator:
         messages.error(request, 'У вас немає дозволу на скасування цього завдання.')
         return redirect('task_detail', pk=task.pk)

@@ -5,7 +5,10 @@ from users.models import User
 
 
 def home(request):
+    # останні активні завдання
     active_tasks = Task.objects.filter(status='open').order_by('-created_at')[:6]
+
+    # статистика для відображення
     volunteer_count = User.objects.filter(user_type='volunteer').count()
     vulnerable_count = User.objects.filter(user_type='vulnerable').count()
     tasks_count = Task.objects.count()
