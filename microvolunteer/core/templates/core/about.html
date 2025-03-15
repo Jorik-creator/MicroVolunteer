@@ -1,0 +1,144 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Про нас - Мікро-Волонтерство{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="mb-4">Про нашу платформу</h1>
+            <p class="lead">Мікро-Волонтерство - це онлайн-платформа, яка об'єднує волонтерів та людей, які потребують допомоги, для створення більш дружньої та підтримуючої спільноти.</p>
+        </div>
+        <div class="col-md-4">
+            <img src="/static/images/about-hero.jpg" alt="Волонтерство" class="img-fluid rounded">
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Наша місія</h2>
+            <div class="card border-0 bg-light p-4">
+                <p class="mb-0">Ми прагнемо створити суспільство, де кожен може отримати необхідну допомогу та підтримку, а також має можливість допомогти іншим.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <h2 class="mb-4">Що таке мікро-волонтерство?</h2>
+            <p>Мікро-волонтерство - це підхід, який дозволяє людям здійснювати невеликі, але значущі волонтерські дії з мінімальними зобов'язаннями часу. Це може бути:</p>
+            <ul>
+                <li>Допомога з покупками для літніх людей</li>
+                <li>Супровід людей з інвалідністю</li>
+                <li>Допомога з домашніми справами</li>
+                <li>Технічна підтримка</li>
+                <li>Транспортування</li>
+                <li>Індивідуальна допомога з будь-якими потребами</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h2 class="mb-4">Як це працює?</h2>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Реєстрація</h5>
+                            <p class="mb-0 text-muted">Створіть обліковий запис як волонтер або як людина, яка потребує допомоги</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Завдання</h5>
+                            <p class="mb-0 text-muted">Створюйте або знаходьте завдання, які відповідають вашим потребам чи можливостям</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Допомога</h5>
+                            <p class="mb-0 text-muted">Виконуйте завдання або отримуйте необхідну підтримку</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Наша команда</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col">
+                    <div class="card h-100 text-center">
+                        <div class="py-3">
+                            <img src="/static/images/team-1.jpg" alt="Ім'я Прізвище" class="rounded-circle" width="150" height="150">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Ім'я Прізвище</h5>
+                            <p class="card-text text-muted">Засновник і CEO</p>
+                            <p class="card-text">Захоплений ідеєю створення більш підтримуючої спільноти через волонтерство.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 text-center">
+                        <div class="py-3">
+                            <img src="/static/images/team-2.jpg" alt="Ім'я Прізвище" class="rounded-circle" width="150" height="150">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Ім'я Прізвище</h5>
+                            <p class="card-text text-muted">Технічний директор</p>
+                            <p class="card-text">Відповідає за розробку та технічну підтримку платформи.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 text-center">
+                        <div class="py-3">
+                            <img src="/static/images/team-3.jpg" alt="Ім'я Прізвище" class="rounded-circle" width="150" height="150">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Ім'я Прізвище</h5>
+                            <p class="card-text text-muted">Координатор спільноти</p>
+                            <p class="card-text">Працює з волонтерами та організаціями для розширення можливостей платформи.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="p-5 text-center bg-primary text-white rounded">
+                <h2 class="mb-3">Приєднуйтесь до нас!</h2>
+                <p class="lead">Станьте частиною нашої спільноти та допомагайте робити світ кращим!</p>
+                <div class="mt-4">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'register' %}" class="btn btn-light btn-lg me-2">Зареєструватися</a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">Увійти</a>
+                    {% else %}
+                        <a href="{% url 'task_list' %}" class="btn btn-light btn-lg">Перейти до завдань</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,217 @@
+{% extends 'core/base.html' %}
+{% load task_filters %}
+{% block title %}{{ task.title }} - Мікро-Волонтерство{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Головна</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'task_list' %}">Завдання</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ task.title }}</li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-3">{{ task.title }}</h1>
+
+        <div class="mb-4">
+            <span class="badge bg-{% if task.status == 'open' %}success{% elif task.status == 'in_progress' %}warning{% elif task.status == 'completed' %}info{% else %}secondary{% endif %} mb-2">
+                {{ task.get_status_display }}
+            </span>
+            {% if task.category %}
+                <span class="badge bg-primary mb-2">{{ task.category.name }}</span>
+            {% endif %}
+        </div>
+
+        {% if task.images.all %}
+            <div id="taskCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in task.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{{ image.image.url }}" class="d-block w-100 rounded" alt="Зображення завдання">
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if task.images.count > 1 %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#taskCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#taskCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="bg-light text-center p-5 rounded mb-4">
+                <i class="fas fa-tasks fa-4x text-secondary"></i>
+                <p class="mt-3 text-muted">Зображення відсутні</p>
+            </div>
+        {% endif %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Опис завдання</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ task.description|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Інформація</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-map-marker-alt me-2"></i> Місце:</span>
+                        <span>{{ task.location }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-calendar-alt me-2"></i> Дата початку:</span>
+                        <span>{{ task.start_date|date:"d.m.Y H:i" }}</span>
+                    </li>
+                    {% if task.end_date %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-calendar-check me-2"></i> Дата завершення:</span>
+                            <span>{{ task.end_date|date:"d.m.Y H:i" }}</span>
+                        </li>
+                    {% endif %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-users me-2"></i> Учасники:</span>
+                        <span>{{ task.participants.count }}/{{ task.max_participants }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-user me-2"></i> Автор:</span>
+                        <span>{{ task.creator.username }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-clock me-2"></i> Створено:</span>
+                        <span>{{ task.created_at|date:"d.m.Y" }}</span>
+                    </li>
+                </ul>
+
+                <div class="progress mt-3 mb-2" style="height: 8px;">
+                    {% with participants_count=task.participants.count %}
+                        {% with percentage=participants_count|floatformat:0|mul:100|div:task.max_participants %}
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ percentage }}%"
+                                aria-valuenow="{{ participants_count }}" aria-valuemin="0" aria-valuemax="{{ task.max_participants }}">
+                            </div>
+                        {% endwith %}
+                    {% endwith %}
+                </div>
+
+                <small class="text-muted d-block mb-3">
+                    {{ task.available_spots }} вільних місць з {{ task.max_participants }}
+                </small>
+
+                {% if user.is_authenticated %}
+                    {% if request.user == task.creator %}
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i> Ви є автором цього завдання
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'task_update' task.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit"></i> Редагувати
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTaskModal">
+                                <i class="fas fa-trash-alt"></i> Видалити
+                            </button>
+
+                            {% if task.status == 'open' or task.status == 'in_progress' %}
+                                <form action="{% url 'task_complete' task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-success d-block w-100">
+                                        <i class="fas fa-check-circle"></i> Відмітити як завершене
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            {% if task.status == 'open' %}
+                                <form action="{% url 'task_cancel' task.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary d-block w-100">
+                                        <i class="fas fa-ban"></i> Скасувати завдання
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% elif is_participant %}
+                        <form action="{% url 'task_leave' task.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger d-block w-100 mb-2" {% if task.is_past_due %}disabled{% endif %}>
+                                <i class="fas fa-sign-out-alt"></i> Відмовитися від участі
+                            </button>
+                        </form>
+                    {% elif can_join %}
+                        <form action="{% url 'task_join' task.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success d-block w-100 mb-2">
+                                <i class="fas fa-hands-helping"></i> Прийняти участь
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary d-block w-100">
+                        <i class="fas fa-sign-in-alt"></i> Увійдіть, щоб прийняти участь
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if task.participants.exists %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Учасники ({{ task.participants.count }})</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for participation in task.participants.all %}
+                            <li class="list-group-item d-flex align-items-center">
+                                {% if participation.user.profile_image %}
+                                    <img src="{{ participation.user.profile_image.url }}" alt="{{ participation.user.username }}" class="rounded-circle me-2" width="32" height="32">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary text-white me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        <i class="fas fa-user fa-sm"></i>
+                                    </div>
+                                {% endif %}
+                                <span>{{ participation.user.username }}</span>
+                                <span class="ms-auto text-muted small">{{ participation.joined_at|date:"d.m.Y" }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if request.user == task.creator %}
+    <div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-labelledby="deleteTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteTaskModalLabel">Підтвердження видалення</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Ви впевнені, що хочете видалити завдання "{{ task.title }}"?</p>
+                    <p class="text-danger">Ця дія незворотня.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <form action="{% url 'task_delete' task.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Видалити</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

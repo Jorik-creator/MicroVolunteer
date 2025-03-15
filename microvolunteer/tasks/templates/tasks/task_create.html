@@ -1,0 +1,243 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Створення завдання - Мікро-Волонтерство{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Створення нового завдання</h1>
+        <p class="lead">Опишіть, яка допомога вам потрібна</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'task_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Повернутися до завдань
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Інформація про завдання</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Назва завдання</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger">
+                                {% for error in form.title.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">Категорія</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-danger">
+                                {% for error in form.category.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Опис завдання</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Детально опишіть, яка допомога вам потрібна</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.location.id_for_label }}" class="form-label">Місце проведення</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            <div class="text-danger">
+                                {% for error in form.location.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label">Дата та час початку</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.start_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.end_date.id_for_label }}" class="form-label">Дата та час закінчення (опційно)</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.end_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.max_participants.id_for_label }}" class="form-label">Кількість необхідних волонтерів</label>
+                        {{ form.max_participants }}
+                        {% if form.max_participants.errors %}
+                            <div class="text-danger">
+                                {% for error in form.max_participants.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ image_form.image.id_for_label }}" class="form-label">Зображення (опційно)</label>
+                        <input type="file" name="images" multiple class="form-control" id="id_images" accept="image/*">
+                        <div class="form-text">Можна завантажити декілька зображень. Максимальний розмір файлу: 5 МБ.</div>
+                    </div>
+
+                    <div id="image-preview-container" class="row mb-3 d-none">
+                        <div class="col-12">
+                            <h6>Попередній перегляд зображень:</h6>
+                            <div id="image-preview" class="d-flex flex-wrap"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Створити завдання</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Корисні поради</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Назва:</strong> Коротка та інформативна назва допоможе привернути увагу волонтерів.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Опис:</strong> Будьте конкретними щодо того, яка допомога вам потрібна.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Місце:</strong> Вкажіть точну адресу або зрозумілий опис місця.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Дата та час:</strong> Виберіть зручний час, коли волонтери зможуть допомогти.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Кількість волонтерів:</strong> Вкажіть реалістичну кількість людей, які потрібні для виконання завдання.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    #id_title, #id_category, #id_description, #id_location, #id_start_date, #id_end_date, #id_max_participants {
+        display: block;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #212529;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    #id_description {
+        min-height: 150px;
+    }
+
+    .image-preview-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('id_images');
+        const previewContainer = document.getElementById('image-preview-container');
+        const preview = document.getElementById('image-preview');
+
+        imageInput.addEventListener('change', function() {
+            preview.innerHTML = '';
+
+            if (this.files.length > 0) {
+                previewContainer.classList.remove('d-none');
+
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+
+                    // Перевірка, чи файл є зображенням
+                    if (!file.type.startsWith('image/')) continue;
+
+                    const reader = new FileReader();
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'image-preview-item';
+
+                    const img = document.createElement('img');
+                    imgContainer.appendChild(img);
+                    preview.appendChild(imgContainer);
+
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                previewContainer.classList.add('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}
