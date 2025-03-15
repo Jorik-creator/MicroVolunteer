@@ -1,0 +1,19 @@
+
+services:
+  web:
+    build: .
+    restart: always
+    volumes:
+      - .:/app
+      - media_data:/app/media
+      - static_data:/app/static
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY="django-insecure-(2#$dm#@+rm^5nq#v(da@w6ovj7=dx3k28nmwfxq@d6bx7^y@2"
+    command: python manage.py runserver 0.0.0.0:8000
+
+volumes:
+  media_data:
+  static_data:
