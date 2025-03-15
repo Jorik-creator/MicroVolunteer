@@ -15,8 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
+    # Адмін-панель
     path('admin/', admin.site.urls),
+
+    # Основні сторінки
+    path('', include('core.urls')),
+
+    # URL для управління користувачами
+    path('users/', include('users.urls')),
+
+    # URL для управління завданнями
+    path('tasks/', include('tasks.urls')),
 ]
+
+# URL для медіа-файлів у режимі розробки(доробити)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
